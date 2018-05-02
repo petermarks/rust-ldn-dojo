@@ -1,6 +1,7 @@
 use std::ops::Add;
 use std::ops::Sub;
 use std::ops::Neg;
+use std::collections::HashMap;
 
 fn find_ring(num : i64) -> i64 {
     (num as f64).sqrt().ceil() as i64 / 2
@@ -14,7 +15,7 @@ fn manhattan_distance(num : i64) -> i64 {
     ring + offset
 }
 
-#[derive(Eq, Debug, Hash, PartialEq)]
+#[derive(Eq, Debug, Hash, PartialEq, Copy, Clone)]
 struct Vec2 {
     x : i64,
     y : i64
@@ -69,24 +70,60 @@ impl Vec2 {
     }
 }
 
-struct Cursor {
+struct Cursor<'a> {
+    mem : &'a mut HashMap<Vec2, i64>,
     pos : Vec2,
     around : Vec2,
     inward : Vec2,
 }
 
-impl Cursor {
-    fn new() -> Cursor {
+impl<'a> Cursor<'a> {
+    fn new(mem : &'a mut HashMap<Vec2, i64>) -> Cursor {
         Cursor {
+            mem,
             pos: Vec2 {x: 0, y: 0},
             around: Vec2 {x: 0, y: -1},
             inward: Vec2 {x: 1, y: 0},
         }
     }
+
+    fn next(&mut self) {
+        let turn = self.mem.contains_key(&(self.pos + self.inward));
+        if turn {
+            self.around = self.inward;
+            self.inward = self.around.rota();
+        }
+        self.pos = self.pos + self.around;
+    }
 }
 
+fn sum_to_target(target : i64) -> i64 {
+    let mut mem = HashMap::new();
+    mem.insert(Vec2{x: 0, y: 0}, 1);
+    let mut cursor = Cursor::new(&mut mem);
+    let mut val = 1;
+
+    while val <= target {
+        cursor.next();
+        val = sum_cells(cursor.mem, &[
+            cursor.pos + cursor.inward,
+            cursor.pos + cursor.inward + cursor.around,
+            cursor.pos + cursor.inward - cursor.around,
+            cursor.pos - cursor.around,
+        ]);
+        println!("pos: {:?} val: {}", cursor.pos, val);
+        cursor.mem.insert(cursor.pos, val);        
+    }
+
+    val
+}
+
+fn sum_cells(mem : &HashMap<Vec2, i64>, ps : &[Vec2]) -> i64 {
+    ps.iter().map(| p | mem.get(p).unwrap_or(&0)).sum()
+} 
+
 fn main() {
-    println!("{}", manhattan_distance(277678));
+    println!("{}", sum_to_target(277678));
 }
 
 #[cfg(test)]
