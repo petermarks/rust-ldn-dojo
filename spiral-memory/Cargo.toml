@@ -1,0 +1,6 @@
+[package]
+name = "spiral-memory"
+version = "0.1.0"
+authors = ["Peter Marks <peter@indigomail.net>"]
+
+[dependencies]
