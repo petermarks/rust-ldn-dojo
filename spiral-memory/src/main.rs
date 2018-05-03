@@ -61,13 +61,6 @@ impl Vec2 {
             y: self.x,
         }
     }
-    
-    fn rotc(&self) -> Vec2 {
-        Vec2 {
-            x: self.y,
-            y: -self.x,
-        }
-    }
 }
 
 struct Cursor<'a> {
@@ -88,7 +81,7 @@ impl<'a> Cursor<'a> {
     }
 
     fn next(&mut self) {
-        let turn = self.mem.contains_key(&(self.pos + self.inward));
+        let turn = !self.mem.contains_key(&(self.pos + self.inward));
         if turn {
             self.around = self.inward;
             self.inward = self.around.rota();
@@ -111,7 +104,6 @@ fn sum_to_target(target : i64) -> i64 {
             cursor.pos + cursor.inward - cursor.around,
             cursor.pos - cursor.around,
         ]);
-        println!("pos: {:?} val: {}", cursor.pos, val);
         cursor.mem.insert(cursor.pos, val);        
     }
 
@@ -123,6 +115,7 @@ fn sum_cells(mem : &HashMap<Vec2, i64>, ps : &[Vec2]) -> i64 {
 } 
 
 fn main() {
+    println!("{}", manhattan_distance(277678));
     println!("{}", sum_to_target(277678));
 }
 
